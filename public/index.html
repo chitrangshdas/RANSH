@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RANSH | Personal AI</title>
+<style>
+:root {
+  --bg:#090b10;--panel:#10141d;--line:#242b39;
+  --text:#edf1fa;--muted:#8993a7;--gold:#d7b56d;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+font-family:Inter,system-ui,Arial,sans-serif;height:100vh}
+button,input{font:inherit}
+button{cursor:pointer}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:265px;background:#0d1017;border-right:1px solid var(--line);
+padding:20px;display:flex;flex-direction:column;gap:18px}
+.brand{font-size:25px;font-weight:800;letter-spacing:4px;color:var(--gold)}
+.brand small{display:block;font-size:10px;letter-spacing:3px;color:var(--muted);margin-top:5px}
+.new{padding:12px;border:1px solid #51452e;background:#1a1b1c;
+color:var(--gold);border-radius:9px;text-align:left}
+.section{font-size:11px;color:var(--muted);letter-spacing:2px}
+.history{overflow:auto;flex:1}
+.chat-item{padding:11px;border-radius:8px;color:#b9c1d1;
+font-size:13px;cursor:pointer;overflow:hidden;text-overflow:ellipsis}
+.chat-item:hover,.chat-item.active{background:#1b2230}
+.profile{border-top:1px solid var(--line);padding-top:16px;font-size:13px}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{height:65px;border-bottom:1px solid var(--line);display:flex;
+align-items:center;justify-content:space-between;padding:0 25px}
+.mode{background:#171d28;color:var(--gold);border:1px solid var(--line);
+padding:9px 14px;border-radius:8px}
+.status{font-size:12px;color:#83c99b}
+.messages{flex:1;overflow:auto;padding:35px 20px}
+.welcome{max-width:680px;margin:10vh auto;text-align:center}
+.orb{width:76px;height:76px;border:1px solid #75603a;border-radius:50%;
+margin:0 auto 25px;display:grid;place-items:center;color:var(--gold);
+font-size:32px;box-shadow:0 0 35px #d7b56d22}
+h1{font-size:35px;letter-spacing:2px;margin:0 0 12px}
+.gold{color:var(--gold)}
+.subtitle{color:var(--muted);font-size:14px}
+.suggestions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:35px}
+.suggestion{padding:16px;background:var(--panel);border:1px solid var(--line);
+border-radius:11px;color:#c6ccda;text-align:left}
+.suggestion:hover{border-color:var(--gold)}
+.message{max-width:780px;margin:0 auto 20px;padding:15px 18px;
+border-radius:12px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.user{background:#192131;margin-left:auto}
+.assistant{background:#121823;border:1px solid var(--line);margin-right:auto}
+.composer-wrap{padding:15px 20px 22px;border-top:1px solid var(--line)}
+.composer{max-width:850px;margin:auto;display:flex;gap:10px;
+background:#151a25;border:1px solid #30394a;border-radius:13px;padding:9px}
+.composer input{flex:1;min-width:0;background:transparent;border:0;
+outline:0;color:white;padding:10px}
+.send{background:var(--gold);color:#111;border:0;border-radius:9px;
+padding:0 20px;font-weight:700}
+.note{text-align:center;color:#687287;font-size:11px;margin-top:12px}
+.auth{position:fixed;inset:0;background:#090b10;display:none;
+align-items:center;justify-content:center;padding:20px;z-index:5}
+.auth-card{width:100%;max-width:390px;background:#111722;border:1px solid var(--line);
+border-radius:16px;padding:28px}
+.auth-card input{width:100%;padding:13px;margin:8px 0 15px;
+background:#090d14;color:white;border:1px solid var(--line);border-radius:8px}
+.auth-card button{width:100%;padding:13px;background:var(--gold);
+border:0;border-radius:8px;font-weight:700}
+.auth-card a{color:var(--gold);cursor:pointer}
+@media(max-width:650px){
+.sidebar{width:70px;padding:12px 8px;align-items:center}
+.brand{font-size:17px}.brand small,.section,.history,.profile{display:none}
+.new{font-size:0;width:48px;text-align:center}
+.new:after{content:"+";font-size:23px}
+.top{padding:0 12px}.messages{padding:20px 12px}
+.suggestions{grid-template-columns:1fr}
+h1{font-size:27px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand">RANSH<small>PERSONAL INTELLIGENCE</small></div>
+  <button class="new" onclick="newChat()">＋ New conversation</button>
+  <div class="section">YOUR HISTORY</div>
+  <div class="history" id="history"></div>
+  <div class="profile">
+    <div id="userLabel">Guest session</div>
+    <button onclick="showAuth()" style="margin-top:12px;background:none;color:#d7b56d;border:0">Login / Register</button>
+    <button onclick="logout()" style="margin-top:8px;background:none;color:#8993a7;border:0">Logout</button>
+  </div>
+</aside>
+<main class="main">
+  <header class="top">
+    <button class="mode" onclick="alert('RANSH Core selected')">✦ RANSH Core</button>
+    <span class="status">● SYSTEM READY</span>
+  </header>
+  <section class="messages" id="messages">
+    <div class="welcome" id="welcome">
+      <div class="orb">✦</div>
+      <h1>HELLO, <span class="gold">HUMAN.</span></h1>
+      <p class="subtitle">Your thoughts. Your knowledge. Your intelligence.</p>
+      <div class="suggestions">
+        <button class="suggestion" onclick="suggest('Help me research a topic')">⌕ Research something<br><small>Explore ideas and information</small></button>
+        <button class="suggestion" onclick="suggest('Help me plan my day')">◷ Plan my day<br><small>Organise your productivity</small></button>
+        <button class="suggestion" onclick="suggest('Teach me a difficult concept')">✧ Learn something<br><small>Understand complex concepts</small></button>
+        <button class="suggestion" onclick="suggest('Help me solve a coding problem')">⌘ Build something<br><small>Code, debug and create</small></button>
+      </div>
+    </div>
+  </section>
+  <div class="composer-wrap">
+    <form class="composer" id="chatForm">
+      <input id="prompt" placeholder="Message RANSH..." autocomplete="off">
+      <button class="send" id="sendBtn">Send ↑</button>
+    </form>
+    <div class="note">RANSH can make mistakes. Verify important information.</div>
+  </div>
+</main>
+</div>
+
+<div class="auth" id="auth">
+ <div class="auth-card">
+  <div class="brand">RANSH</div>
+  <h2 id="authTitle">Welcome back</h2>
+  <label>Email</label>
+  <input id="email" type="email" placeholder="you@example.com">
+  <label>Password</label>
+  <input id="password" type="password" placeholder="Minimum 10 characters">
+  <button onclick="authenticate()">Continue</button>
+  <p style="color:#8993a7;font-size:13px;margin-top:20px">
+   <span id="authText">New here?</span>
+   <a onclick="toggleAuth()" id="authToggle">Create account</a>
+  </p>
+  <button onclick="hideAuth()" style="background:transparent;color:#8993a7;margin-top:10px">Close</button>
+  <p id="authError" style="color:#ff8585;font-size:12px"></p>
+ </div>
+</div>
+
+<script>
+let token=localStorage.getItem("ransh_token");
+let currentChat=null;
+let registerMode=false;
+
+const messages=document.getElementById("messages");
+const historyBox=document.getElementById("history");
+
+function showAuth(){document.getElementById("auth").style.display="flex"}
+function hideAuth(){document.getElementById("auth").style.display="none"}
+function toggleAuth(){
+ registerMode=!registerMode;
+ document.getElementById("authTitle").textContent=registerMode?"Create account":"Welcome back";
+ document.getElementById("authText").textContent=registerMode?"Already registered?":"New here?";
+ document.getElementById("authToggle").textContent=registerMode?"Login":"Create account";
+}
+function logout(){
+ localStorage.removeItem("ransh_token");
+ token=null;currentChat=null;
+ document.getElementById("userLabel").textContent="Guest session";
+ historyBox.innerHTML="";newChat();
+}
+async function api(url,options={}){
+ const response=await fetch("/api"+url,{
+  ...options,
+  headers:{
+   "Content-Type":"application/json",
+   ...(token?{Authorization:"Bearer "+token}:{}),
+   ...options.headers
+  }
+ });
+ const data=await response.json();
+ if(!response.ok)throw new Error(data.error||"Request failed");
+ return data;
+}
+async function authenticate(){
+ try{
+  const data=await api("/auth/"+(registerMode?"register":"login"),{
+   method:"POST",
+   body:JSON.stringify({
+    email:document.getElementById("email").value,
+    password:document.getElementById("password").value
+   })
+  });
+  token=data.token;
+  localStorage.setItem("ransh_token",token);
+  document.getElementById("userLabel").textContent=data.user.email;
+  hideAuth();await loadChats();newChat();
+ }catch(e){document.getElementById("authError").textContent=e.message}
+}
+function addMessage(role,text){
+ document.getElementById("welcome")?.remove();
+ const div=document.createElement("div");
+ div.className="message "+role;
+ div.textContent=text;
+ messages.appendChild(div);
+ messages.scrollTop=messages.scrollHeight;
+}
+function newChat(){
+ currentChat=null;
+ messages.innerHTML='<div class="welcome" id="welcome"><div class="orb">✦</div><h1>HELLO, <span class="gold">HUMAN.</span></h1><p class="subtitle">Your thoughts. Your knowledge. Your intelligence.</p></div>';
+ document.querySelectorAll(".chat-item").forEach(x=>x.classList.remove("active"));
+}
+function suggest(text){
+ document.getElementById("prompt").value=text;
+ document.getElementById("chatForm").requestSubmit();
+}
+async function loadChats(){
+ if(!token)return;
+ try{
+  const chats=await api("/chats");
+  historyBox.innerHTML="";
+  chats.forEach(chat=>{
+   const item=document.createElement("div");
+   item.className="chat-item";
+   item.textContent=chat.title;
+   item.onclick=()=>openChat(chat.id,item);
+   historyBox.appendChild(item);
+  });
+ }catch(e){console.error(e)}
+}
+async function openChat(id,item){
+ currentChat=id;
+ document.querySelectorAll(".chat-item").forEach(x=>x.classList.remove("active"));
+ item.classList.add("active");
+ messages.innerHTML="";
+ const rows=await api("/chats/"+id+"/messages");
+ rows.forEach(m=>addMessage(m.role==="assistant"?"assistant":"user",m.content));
+}
+document.getElementById("chatForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ const input=document.getElementById("prompt");
+ const text=input.value.trim();
+ if(!text)return;
+ input.value="";
+ addMessage("user",text);
+ if(!token){
+  addMessage("assistant","Please login or create an account to start chatting.");
+  showAuth();return;
+ }
+ const btn=document.getElementById("sendBtn");
+ btn.disabled=true;btn.textContent="...";
+ try{
+  if(!currentChat){
+   const chat=await api("/chats",{method:"POST",body:JSON.stringify({title:text.slice(0,60)})});
+   currentChat=chat.id;await loadChats();
+  }
+  const result=await api("/chats/"+currentChat+"/messages",{
+   method:"POST",body:JSON.stringify({message:text})
+  });
+  addMessage("assistant",result.reply);
+ }catch(err){addMessage("assistant","Error: "+err.message)}
+ finally{btn.disabled=false;btn.textContent="Send ↑"}
+});
+async function init(){
+ if(token){
+  try{
+   const data=await api("/me");
+   document.getElementById("userLabel").textContent=data.user.email;
+   await loadChats();
+  }catch(e){logout()}
+ }
+}
+init();
+</script>
+</body>
+</html>
